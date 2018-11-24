@@ -132,9 +132,6 @@ dependencies:
     - docutils==0.14
     - docx2txt==0.6
     - ebooklib==0.15
-    - en-core-web-lg
-    - en-core-web-sm
-    - en-vectors-web-lg
     - ftfy==4.4.3
     - gast==0.2.0
     - gensim==3.6.0
