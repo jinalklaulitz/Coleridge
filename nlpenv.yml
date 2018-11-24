@@ -14,7 +14,7 @@ dependencies:
   - certifi=2018.10.15=py36_0
   - cffi=1.11.5=py36he75722e_1
   - cycler=0.10.0=py36_0
-  - cython=0.29-py36he6710b0_0
+  - cython
   - dbus=1.13.2=h714fa37_1
   - decorator=4.3.0=py36_0
   - entrypoints=0.2.3=py36_2
