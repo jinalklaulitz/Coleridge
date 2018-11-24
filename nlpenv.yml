@@ -14,6 +14,7 @@ dependencies:
   - certifi=2018.10.15=py36_0
   - cffi=1.11.5=py36he75722e_1
   - cycler=0.10.0=py36_0
+  - cython=0.29-py36he6710b0_0
   - dbus=1.13.2=h714fa37_1
   - decorator=4.3.0=py36_0
   - entrypoints=0.2.3=py36_2
@@ -95,7 +96,7 @@ dependencies:
   - qtconsole=4.4.2=py36_0
   - readline=7.0=h7b6447c_5
   - send2trash=1.5.0=py36_0
-  - setuptools=40.4.3=py36_0
+  - setuptools=39.1.0=py36_0
   - simplegeneric=0.8.1=py36_2
   - sip=4.19.8=py36hf484d3e_0
   - six=1.11.0=py36_1
