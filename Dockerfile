@@ -45,15 +45,18 @@ RUN wget --quiet https://raw.githubusercontent.com/jinalklaulitz/Coleridge/maste
 #create nlp conda environment
 RUN conda env create --name nlpEnv --file=nlpenv.yml
 
-#a number of things complicate the automatic installation of spacy's english models so we just them here
-RUN python -m spacy download en_core_web_sm en_core_web_lg en-vectors-web-lg --direct
+#change environment to nlpEnv and install spacy english models (the pip install method doesn't work)
+ENV PATH /opt/conda/envs/nlpEnv/bin:$PATH
+#RUN python -m spacy download en_core_web_sm en_core_web_lg en_vectors_web_lg en_core_web_md
+RUN pip3 install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz \
+https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.0.0/en_core_web_lg-2.0.0.tar.gz \
+https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.0.0/en_core_web_lg-2.0.0.tar.gz
 
 # Python 3 package install example - <depreciated since we install anaconda>
 #RUN pip3 install ipython matplotlib numpy pandas scikit-learn scipy six
 
 # create directory for work.
-RUN cd /
-RUN mkdir /work
+RUN cd /  && mkdir /work
 
 # clone the rich context repo into /rich-context-competition
 RUN git clone https://github.com/Coleridge-Initiative/rich-context-competition.git /rich-context-competition
