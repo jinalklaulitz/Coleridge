@@ -17,7 +17,7 @@ ENV PATH /opt/conda/bin:$PATH
 #install os related stuff
 RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificates \
 libglib2.0-0 libxext6 libsm6 libxrender1 \
-git mercurial subversion gcc g++ python3-dev python3-pip libxml2-dev libxslt1-dev zlib1g-dev
+git mercurial subversion gcc g++ python3-dev python3-pip libxml2-dev libxslt1-dev zlib1g-dev vim nano
 
 #install anaconda
 RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-5.3.1-Linux-x86_64.sh -O ~/anaconda.sh && \
