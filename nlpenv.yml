@@ -191,5 +191,9 @@ dependencies:
     - wrapt==1.10.11
     - xlrd==1.0.0
     - xlsxwriter==1.1.2
+    - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz 
+    - https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.0.0/en_core_web_lg-2.0.0.tar.gz 
+    - https://github.com/explosion/spacy-models/releases/download/en_core_web_md-2.0.0/en_core_web_md-2.0.0.tar.gz
+    - tensorflow-gpu
 prefix: /home/urwa/miniconda3/envs/nlp
 
