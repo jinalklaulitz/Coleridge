@@ -2,7 +2,9 @@
 #from ubuntu:18.04
 #used some things from the tensorflow dockerfile  https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/dockerfiles/dockerfiles/nvidia.Dockerfile
 #from nvidia/cuda:10.0-base-ubuntu18.04
-FROM nvidia/cuda:9.0-base-ubuntu16.04
+#FROM nvidia/cuda:9.0-base-ubuntu16.04
+#trying the pre-build docker container from NVIDIA
+FROM nvcr.io/nvidia/tensorflow:18.11-py3
 
 MAINTAINER marvin mananghaya <msm796@nyu.edu>
 
@@ -23,20 +25,20 @@ RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificate
 libglib2.0-0 libxext6 libsm6 libxrender1 \
 git mercurial subversion gcc g++ python3-dev python3-pip libxml2-dev libxslt1-dev zlib1g-dev vim nano \
 # added some lines from the cuda-tensorflow dockerfile
-build-essential \
-cuda-command-line-tools-9-0 \
-cuda-cublas-9-0 \
-cuda-cufft-9-0 \
-cuda-curand-9-0 \
-cuda-cusolver-9-0 \
-cuda-cusparse-9-0 \
-libcudnn7=7.2.1.38-1+cuda9.0 \
-libnccl2=2.2.13-1+cuda9.0 \
-libfreetype6-dev \
-libhdf5-serial-dev \
-libpng12-dev \
-libzmq3-dev \
-pkg-config \
+#build-essential \
+#cuda-command-line-tools-9-0 \
+#cuda-cublas-9-0 \
+#cuda-cufft-9-0 \
+#cuda-curand-9-0 \
+#cuda-cusolver-9-0 \
+#cuda-cusparse-9-0 \
+#libcudnn7=7.2.1.38-1+cuda9.0 \
+#libnccl2=2.2.13-1+cuda9.0 \
+#libfreetype6-dev \
+#libhdf5-serial-dev \
+#libpng12-dev \
+#libzmq3-dev \
+#pkg-config \
 software-properties-common \
 unzip \
 && \
@@ -44,10 +46,10 @@ apt-get clean && \
 rm -rf /var/lib/apt/lists/*
 
 
-RUN apt-get update && \
-        apt-get install nvinfer-runtime-trt-repo-ubuntu1604-4.0.1-ga-cuda9.0 && \
-        apt-get update && \
-        apt-get install libnvinfer4=4.1.2-1+cuda9.0
+#RUN apt-get update && \
+#        apt-get install nvinfer-runtime-trt-repo-ubuntu1604-4.0.1-ga-cuda9.0 && \
+#        apt-get update && \
+#        apt-get install libnvinfer4=4.1.2-1+cuda9.0
 
 ARG USE_PYTHON_3_NOT_2=True
 ARG _PY_SUFFIX=${USE_PYTHON_3_NOT_2:+3}
