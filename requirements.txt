@@ -113,3 +113,7 @@ widgetsnbextension=3.4.2=py36_0
 xz=5.2.4=h14c3975_4
 zeromq=4.2.5=hf484d3e_1
 zlib=1.2.11=ha838bed_2
+spacy
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz
+https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.0.0/en_core_web_lg-2.0.0.tar.gz 
+https://github.com/explosion/spacy-models/releases/download/en_core_web_md-2.0.0/en_core_web_md-2.0.0.tar.gz
