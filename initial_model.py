@@ -63,6 +63,7 @@ import numpy as np
 import pandas as pd
 import re
 import os
+import os.path
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import random
@@ -252,11 +253,11 @@ def expandDatesWithTo(text):
 def loadDataSetTitlesAndIds(datasetJsonFile):
     text = load_doc(datasetJsonFile)
     loaded_json_all = json.loads(text)
-              
     dataSetIds = [ dataset['data_set_id'] for dataset in loaded_json_all ]
     dataSetTitles = [ dataset['title'] for dataset in loaded_json_all ]
-    
-    return dataSetIds,dataSetTitles
+    dataSetDate = [ dataset['date'] for dataset in loaded_json_all ]
+    datasetyears = [int(d[:4]) if d != 'None' else 0 for d in dataSetDate]
+    return datasetyears,dataSetIds,dataSetTitles
 
 def getLabelLength(labels):
     return [len(l) for l in labels]
@@ -361,7 +362,7 @@ def print_Hits(sentence,score):
 def getTrueLabels(samplePublications):
     sampleTextFiles = [p['text_file_name'] for p in samplePublications]
     file = 'publications.json' ##
-    directory = '../train_test/' #go back to me marvin#
+    directory = './train_test/' #go back to me marvin#
     pub_json = pd.read_json(directory+file)
 
     pub_json.head()
@@ -371,7 +372,7 @@ def getTrueLabels(samplePublications):
     pub_json.head()
 
     file = 'data_set_citations.json'
-    directory = '../train_test/' #go back to me marvin#
+    directory = './train_test/' #go back to me marvin#
     cit = pd.read_json(directory+file)
 
     cit = cit[['data_set_id', 'publication_id']]
@@ -475,7 +476,7 @@ def getSimilarityMatrix_sent_datasets(hitSents,vectorizerDataset,dataset_Ngram):
     print('Cos Sim shape: ',Cos_Sim.shape)
     return Cos_Sim
 
-def getDatasetCandidateMatchesDF(df,Cos_Sim,dataSetIds,dataSetTitles, sim_threshHold,pubId):  
+def getDatasetCandidateMatchesDF(df,Cos_Sim,dataSetIds,dataSetTitles,datasetYears, sim_threshHold,pubId,pubYear):  
     #Cos_Sim = min_max_2D(Cos_Sim)
     DataLabel = []
     DataTitle = []
@@ -485,7 +486,7 @@ def getDatasetCandidateMatchesDF(df,Cos_Sim,dataSetIds,dataSetTitles, sim_thresh
         dtit = []
         sscr = []
         for j in range(len(Cos_Sim[0])):
-            if(Cos_Sim[i][j] > sim_threshHold):
+            if(Cos_Sim[i][j] > sim_threshHold and datasetYears[j] <= pubYear ):
                 did.append(dataSetIds[j])
                 dtit.append(dataSetTitles[j])
                 sscr.append(Cos_Sim[i][j])
@@ -617,59 +618,62 @@ def runPipeLine(publications, max_seq_len, hit_th , sim_th, group_sim_th):
     citationsDF = None
     mentionsDF = None
     for pub in publications:
-        file = pub['text_file_name']
-        pubId = pub['publication_id']
-        txt = load_doc(TEXT_DIRECTORY+file)
-        dates,sentences,entities = parseSpacy(txt)
-        filteredSentences = filterSentencesByNer(sentences,entities)
-        filteredSentences = removeSpecialCharacters(filteredSentences)
-        
-        pubYear = getMaxyear(dates)
-        
-        processed_lines = process_docs(filteredSentences, cnnVocab)
-        encoded_docs = cnnTokenizer.texts_to_sequences(processed_lines)
-        processed_sequences = pad_sequences(encoded_docs, maxlen=max_seq_len, padding='post')
-        y_prob = model.predict(processed_sequences).reshape(len(processed_lines))
-        y_hat = model.predict_classes(processed_sequences).reshape(len(processed_lines))
+        if os.path.isfile(TEXT_DIRECTORY+pub['text_file_name']):
+            file = pub['text_file_name']
+            pubId = pub['publication_id']
+            txt = load_doc(TEXT_DIRECTORY+file)
+            dates,sentences,entities = parseSpacy(txt)
+            filteredSentences = filterSentencesByNer(sentences,entities)
+            filteredSentences = removeSpecialCharacters(filteredSentences)
 
-        classifierResultDF = getMentionSentencesDF(filteredSentences, y_hat, y_prob, hit_th)
+            pubYear = getMaxyear(dates)
 
-        if len(classifierResultDF) < 1:
-            print("No mentions for file : ",file)
-            continue
-    
-        cosineSim_sent_dataset = getSimilarityMatrix_sent_datasets(classifierResultDF.sentence.values, \
-                                                          vectorizerDataset,dataset_Ngram)
+            processed_lines = process_docs(filteredSentences, cnnVocab)
+            encoded_docs = cnnTokenizer.texts_to_sequences(processed_lines)
+            processed_sequences = pad_sequences(encoded_docs, maxlen=max_seq_len, padding='post')
+            y_prob = model.predict(processed_sequences).reshape(len(processed_lines))
+            y_hat = model.predict_classes(processed_sequences).reshape(len(processed_lines))
 
-        candidateMatchesDF = getDatasetCandidateMatchesDF(classifierResultDF,cosineSim_sent_dataset, \
-                                                          dataSetIds,dataSetTitles,dataSetYears, \
-                                                          sim_th,pubId,pubYear)
-        
-        datasetGroupsTitles = mergeSimilarDatasets(candidateMatchesDF)
+            classifierResultDF = getMentionSentencesDF(filteredSentences, y_hat, y_prob, hit_th)
 
-        resDf = generateResults(datasetGroupsTitles,dataset_name_to_Id,candidateMatchesDF,pubId, \
-                                group_sim_th)
-        
-        
-        mentionsdf = getMentionsResults(candidateMatchesDF)
-        
-        if mentionsDF is None:
-            mentionsDF = mentionsdf
-        else:
-            mentionsDF = mentionsDF.append(mentionsdf)
-    
-        if citationsDF is None:
-            citationsDF = resDf
-        else:
-            if len(resDf) < 1:
-                print("No dataset matched mentions for file : ",file)
+            if len(classifierResultDF) < 1:
+                print("No mentions for file : ",file)
+                continue
+
+            cosineSim_sent_dataset = getSimilarityMatrix_sent_datasets(classifierResultDF.sentence.values, \
+                                                              vectorizerDataset,dataset_Ngram)
+
+            candidateMatchesDF = getDatasetCandidateMatchesDF(classifierResultDF,cosineSim_sent_dataset, \
+                                                              dataSetIds,dataSetTitles,dataSetYears, \
+                                                              sim_th,pubId,pubYear)
+
+            datasetGroupsTitles = mergeSimilarDatasets(candidateMatchesDF)
+
+            resDf = generateResults(datasetGroupsTitles,dataset_name_to_Id,candidateMatchesDF,pubId, \
+                                    group_sim_th)
+
+
+            mentionsdf = getMentionsResults(candidateMatchesDF)
+
+            if mentionsDF is None:
+                mentionsDF = mentionsdf
             else:
-                citationsDF = citationsDF.append(resDf)
-        print()   
+                mentionsDF = mentionsDF.append(mentionsdf)
+
+            if citationsDF is None:
+                citationsDF = resDf
+            else:
+                if len(resDf) < 1:
+                    print("No dataset matched mentions for file : ",file)
+                else:
+                    citationsDF = citationsDF.append(resDf)
+            print()
+        else:
+            print("passing over {}".format(pub))
     return citationsDF,mentionsDF
 
 ##evaluation function
-def evaluatePipeline(samplePublications,Th,Ts,Tgs):
+def evaluatePipeline(publications,Th,Ts,Tgs):
     resultsDF,_ = runPipeLine(samplePublications,max_seq_len = 66, hit_th = Th, \
                             sim_th = Ts,group_sim_th = Tgs)
     if resultsDF is None:
@@ -702,8 +706,8 @@ sampleIndex = np.random.randint(0,len(publications),sampleSize)
 samplePublications = [t for i,t in enumerate(publications) if i in sampleIndex]
 len(samplePublications)
 
-resultsDF,matchDF = runPipeLine(samplePublications,max_seq_len = 66, hit_th = 0.8, \
-                            sim_th = 0.2,group_sim_th = 0.8)
+resultsDF,matchDF = runPipeLine(publications,max_seq_len = 66, hit_th = 0.8, \
+                            sim_th = 0.4,group_sim_th = 0.8)
 
 save_citations(resultsDF)
 save_mentions(matchDF)
