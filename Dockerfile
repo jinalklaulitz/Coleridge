@@ -4,7 +4,8 @@
 #from nvidia/cuda:10.0-base-ubuntu18.04
 #FROM nvidia/cuda:9.0-base-ubuntu16.04
 #trying the pre-build docker container from NVIDIA
-FROM nvcr.io/nvidia/tensorflow:18.11-py3
+#FROM nvcr.io/nvidia/tensorflow:18.11-py3
+FROM nvcr.io/nvidia/cuda:9.0-cudnn7.2-devel-ubuntu16.04
 
 MAINTAINER marvin mananghaya <msm796@nyu.edu>
 
