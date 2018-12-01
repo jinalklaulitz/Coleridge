@@ -10,7 +10,6 @@
 #                 |- files (txt,pdf)   
 # | -- train_test |
 # |              
-# |
 # | -- main folder <where this script is>
 #
 #Datasources:
@@ -31,11 +30,14 @@
 #   8.) fields_lines.txt
 #   9.) abbbreviations.json	
 #   10.) bmvocab.txt
+#   11.) sage_methods_vocab.tx'
 #
 #Output:
 # folder path: 
 #   1.) data_set_mentions.json 
 #   2.) data_set_citations.json 
+#   3.) methods.json
+#   4.) research_methods.json
 #
 ########################################################################Declare/Import Libraries##################################################3
 from string import punctuation
@@ -104,7 +106,7 @@ OUTPUT_DIRECTORY = './output/'
 SAGE_FIELDS_FILE = '../train_test/sage_research_fields.json'
 SAGE_VOCAB_FILE = 'sage_fields_vocab.txt'
 SAGE_FIELDS_LINES = 'fields_lines.txt'
-
+SAGE_METHODS_VOCAB = 'sage_methods_vocab.txt'
 #############################################################################Declare Helper Functions################################################
 
 # load doc into memory
@@ -764,4 +766,42 @@ def getSageFields(publications):
 
 sageFieldsJson = getSageFields(samplePublications)
 with open(OUTPUT_DIRECTORY+'research_fields.json', 'w') as fp:
+        json.dump(sageFieldsJson, fp)
+################################################################################--RESEARCH METHODS--################################################################################3
+def getSageMethods(publications):
+    sageMethodVocab = load_doc(SAGE_METHODS_VOCAB).split('\n')
+    methodsList = []
+    for pub in publications:
+        txt = load_doc(TEXT_DIRECTORY + pub['text_file_name'])
+        tok = txt.split()
+        # remove punctuation from each token
+        table = str.maketrans('', '', string.punctuation)
+        tok = [w.translate(table) for w in tok]
+        # remove remaining tokens that are not alphabetic
+        tok = [word for word in tok if word.isalpha()]
+        # remove the tokens not in vocab
+        tok = [word for word in tok if word in sageMethodVocab]
+        # count occurences
+        counter = Counter()
+        counter.update(tok)
+        # dictionary to score by count
+        scoreDict = {4:0.2, 5:0.4, 6:0.6, 7:0.8, 8:1}
+        # methods and their counts
+        meth = [k for k,c in counter.items() if c > 3]
+        cnt = [c if c<=8 else 8 for k,c in counter.items() if c > 3]
+        # computing score
+        scr = [scoreDict[k] for k in cnt]
+        # populating list of dictionary
+        mList = []
+        for i in range(len(meth)):
+            row = {}
+            row['publication_id'] = pub['publication_id']
+            row['method'] = meth[i]
+            row['score'] = scr[i]
+            mList.append(row)
+        methodsList += mList
+    return methodsList
+
+sageMethodsJson = getSageMethods(samplePublications)
+with open(OUTPUT_DIRECTORY+'methods.json', 'w') as fp:
         json.dump(sageFieldsJson, fp)
