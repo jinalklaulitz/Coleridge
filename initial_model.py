@@ -5,6 +5,14 @@
 #Created by: Urwa Muaz & Tanya Nabila
 #Maintained by: Marvin Mananghaya
 #######################################
+# Required folder structure
+#
+#                 |- files (txt,pdf)   
+# | -- train_test |
+# |              
+# |
+# | -- main folder <where this script is>
+#
 #Datasources:
 # folder path: ../train_test
 #   1.) publications.json
@@ -12,7 +20,7 @@
 #   3.) data_set_citations.json
 #   4.) sage_research_fields.json  
 #
-# folder path: .
+# folder path: . (main folder)
 #   1.) CNNtokenizer.pickle
 #   2.) CNNmodel.json 
 #   3.) CNNmodel.h5
@@ -21,6 +29,8 @@
 #   6.) labelledTextFiles.txt 
 #   7.) sage_fields_vocab.txt
 #   8.) fields_lines.txt
+#   9.) abbbreviations.json	
+#   10.) bmvocab.txt
 #
 #Output:
 # folder path: 
@@ -55,6 +65,19 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import random
 import spacy
+from numpy import array
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Flatten
+from keras.layers import Embedding
+from keras.layers.convolutional import Conv1D
+from keras.layers.convolutional import MaxPooling1D
+from keras.layers import Dropout
+from keras import regularizers
+from keras.models import model_from_json
+import pickle
 #Data Processing related declaration
 from nltk.stem import PorterStemmer
 from nltk.tokenize import sent_tokenize, word_tokenize
@@ -77,7 +100,7 @@ CNN_VOCAB_FILE = 'bmvocab.txt'
 DATSETS_JSON_FILE = '../train_test/data_sets.json'
 PROCESSED_DATASET_LINES = 'datasets_lines_production.txt'
 PUBLICATIONS_JSON_FILE = '../train_test/publications.json'
-OUTPUT_DIRECTORY = './output'
+OUTPUT_DIRECTORY = './output/'
 SAGE_FIELDS_FILE = '../train_test/sage_research_fields.json'
 SAGE_VOCAB_FILE = 'sage_fields_vocab.txt'
 SAGE_FIELDS_LINES = 'fields_lines.txt'
@@ -654,7 +677,7 @@ save_citations(resultsDF)
 save_mentions(matchDF)
 
 
-##########################################################Research fields################################################################3
+##########################################################--Research fields--################################################################3
 def fields_clean_doc(doc):
     #
     doc = doc.replace('(general)','')
