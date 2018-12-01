@@ -238,6 +238,17 @@ def loadVocab(vocabFile):
     vocab = set(vocab)
     return vocab
 
+def expandDatesWithTo(text):
+    matches = re.findall(r'([1-2][09][0-9]{2} to [1-2][09][0-9]{2})', text)
+    for m in matches:
+        start = int(m[0:4])
+        end = int(m[8:12])
+        if (end>start):
+            years = list( range(start,end+1) )
+            years = [str(y) for y in years]
+            text += " " + ' '.join(years)
+    return text
+
 def loadDataSetTitlesAndIds(datasetJsonFile):
     text = load_doc(datasetJsonFile)
     loaded_json_all = json.loads(text)
@@ -277,6 +288,9 @@ def treatDates(tokens):
 def clean_mention(doc):
     # abbreviation disambiguation
     doc = expandAbbreviation(doc, abbreviations)
+
+    #expand dates like 2000 to 2002 into 2002 2001 2002 #Fix2
+    doc = expandDatesWithTo(doc)
     
     # split into tokens by white space
     tokens = doc.split()
