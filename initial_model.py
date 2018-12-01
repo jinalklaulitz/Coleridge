@@ -33,7 +33,7 @@
 #   11.) sage_methods_vocab.tx'
 #
 #Output:
-# folder path: 
+# folder path: data/output/
 #   1.) data_set_mentions.json 
 #   2.) data_set_citations.json 
 #   3.) methods.json
@@ -93,17 +93,17 @@ nlp = spacy.load('en_core_web_lg')
 ps = PorterStemmer()
 
 #params
-TEXT_DIRECTORY = '../train_test/files/text/'
+TEXT_DIRECTORY = '/data/input/files/text/'
 CNN_TOKENIZER_File = 'CNNtokenizer.pickle'
 CNN_MODEL_FILE = 'CNNmodel.json'
 CNN_MODEL_WEIGHTS_FILE = "CNNmodel.h5"
 DATASET_VOCAB_FILE = 'dataset_vocab_production.txt'
 CNN_VOCAB_FILE = 'bmvocab.txt'
-DATSETS_JSON_FILE = '../train_test/data_sets.json'
+DATSETS_JSON_FILE = './train_test/data_sets.json'
 PROCESSED_DATASET_LINES = 'datasets_lines_production.txt'
-PUBLICATIONS_JSON_FILE = '../train_test/publications.json'
-OUTPUT_DIRECTORY = './output/'
-SAGE_FIELDS_FILE = '../train_test/sage_research_fields.json'
+PUBLICATIONS_JSON_FILE = '/data/input/publications.json'
+OUTPUT_DIRECTORY = '/data/output/'
+SAGE_FIELDS_FILE = './train_test/sage_research_fields.json'
 SAGE_VOCAB_FILE = 'sage_fields_vocab.txt'
 SAGE_FIELDS_LINES = 'fields_lines.txt'
 SAGE_METHODS_VOCAB = 'sage_methods_vocab.txt'
