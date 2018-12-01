@@ -406,8 +406,21 @@ def parseSpacy(text):
     spacydoc = nlp(text)
     sentences = list(spacydoc.sents)
     entities = [e for e in spacydoc.ents if e.label_ == 'ORG']
+    dates = [e for e in spacydoc.ents if e.label_ == 'DATE']
     print("Sentences: ",len(sentences))
-    return sentences,entities
+    return dates,sentences,entities
+
+def getMaxyear(dateEntities):
+    maxdate = 1900
+    for de in dateEntities:
+        dates = re.findall(r'([1-2][09][0-9]{2})', de.text)
+        if len(dates) == 0:
+            continue
+        dates = [int(d) for d in dates]
+        date = np.max(dates)
+        if date > maxdate:
+            maxdate = date
+    return maxdate
 
 def filterSentencesByNer(sentences,entities):
     filteredSentences = [s.text for s in sentences if containsEntity(entities, s)]
@@ -593,9 +606,11 @@ def runPipeLine(publications, max_seq_len, hit_th , sim_th, group_sim_th):
         file = pub['text_file_name']
         pubId = pub['publication_id']
         txt = load_doc(TEXT_DIRECTORY+file)
-        sentences,entities = parseSpacy(txt)
+        dates,sentences,entities = parseSpacy(txt)
         filteredSentences = filterSentencesByNer(sentences,entities)
         filteredSentences = removeSpecialCharacters(filteredSentences)
+        
+        pubYear = getMaxyear(dates)
         
         processed_lines = process_docs(filteredSentences, cnnVocab)
         encoded_docs = cnnTokenizer.texts_to_sequences(processed_lines)
@@ -613,7 +628,8 @@ def runPipeLine(publications, max_seq_len, hit_th , sim_th, group_sim_th):
                                                           vectorizerDataset,dataset_Ngram)
 
         candidateMatchesDF = getDatasetCandidateMatchesDF(classifierResultDF,cosineSim_sent_dataset, \
-                                                          dataSetIds,dataSetTitles,sim_th,pubId)
+                                                          dataSetIds,dataSetTitles,dataSetYears, \
+                                                          sim_th,pubId,pubYear)
         
         datasetGroupsTitles = mergeSimilarDatasets(candidateMatchesDF)
 
@@ -654,7 +670,7 @@ def get_publications():
     return pubJson
 
 publications = get_publications()
-dataSetIds,dataSetTitles = loadDataSetTitlesAndIds(DATSETS_JSON_FILE)
+dataSetYears,dataSetIds,dataSetTitles = loadDataSetTitlesAndIds(DATSETS_JSON_FILE)
 dataset_name_to_Id = dict(zip(dataSetTitles, dataSetIds))
 
 cnnVocab = loadVocab(CNN_VOCAB_FILE)
