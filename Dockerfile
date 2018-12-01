@@ -84,10 +84,10 @@ RUN wget --quiet https://raw.githubusercontent.com/jinalklaulitz/Coleridge/maste
 RUN conda env create --name nlpEnv --file=nlpenv.yml
 
 #change environment to nlpEnv and install spacy english models (the pip install method doesn't work)
-ENV PATH /opt/conda/envs/nlpEnv/bin:$PATH
+#ENV PATH /opt/conda/envs/nlpEnv/bin:$PATH
 
-#download nltk all
-RUN python3 -m nltk.downloader all
+#change environment to nlpEnv and have nltk download necessary package files
+RUN [ “/bin/bash”, “-c”, “source activate nlpEnv && python -m nltk.downloader all” ]
 
 #for TF installation
 #ARG TF_PACKAGE=tensorflow-gpu
